@@ -10,7 +10,13 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-Route::get('/', function () {
-    return view('welcome');
+Route::prefix('api/v1')->group(function () {
+    Route::post('auth/register',     'UserController@register');
+    Route::post('auth/login',        'UserController@login');
+    Route::get('/',function(){
+        return abort(404);
+    });
+});
+Route::middleware(['auth.token'])->prefix('api/v1')->group(function () {
+    
 });
