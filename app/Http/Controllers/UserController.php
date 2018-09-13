@@ -28,7 +28,7 @@ class UserController extends Controller
             $data['password'] = Hash::make($data['password']);
             User::create($data);
             //Mail::to("ansjabr@mailinator.com")->send(new ActivationLink($data));
-            return success([$data['token']]);
+            return success(['_token' => $data['token']]);
         }
         catch(\Exception $e)
         {
@@ -58,7 +58,7 @@ class UserController extends Controller
         $hash = $user -> password;
         if(!$this -> isPasswordValid($data['password'], $hash))
             return failure(["error" => "Username or password did not work"]);
-        return success($user -> first(["name", "email", "username", "token"]) -> toArray());
+        return success($user -> first(["name", "email", "username", "token as _token"]) -> toArray());
     }
     private function isPasswordValid($password, $hash)
     {
