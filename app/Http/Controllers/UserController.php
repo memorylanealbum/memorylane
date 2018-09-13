@@ -90,7 +90,7 @@ class UserController extends Controller
         User::table()
             ->byEmail($data['email'])
             ->update(['password' => $hashed_password]);
-        Mail::to("ansjabr@mailinator.com")->send(new ResetPassword($password));
+        Mail::to($data['email'])->send(new ResetPassword($password));
         return success();
     }
     private function randomPassword()
