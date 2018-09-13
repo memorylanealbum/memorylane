@@ -28,4 +28,8 @@ class User extends Model
     {
         return $query -> where('u.email', $email);
     }
+    public function scopeByToken($query, $token)
+    {
+        return $query -> where('u.token', $token);
+    }
 }

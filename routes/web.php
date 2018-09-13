@@ -18,5 +18,5 @@ Route::prefix('api/v1')->group(function () {
     });
 });
 Route::middleware(['auth.token'])->prefix('api/v1')->group(function () {
-    
+    Route::post('image/upload',     'ImageController@upload');
 });

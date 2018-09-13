@@ -122,4 +122,14 @@ class UserController extends Controller
                     ->update(['password' => $hashed_password]);
         return success();
     }
+    public function validateToken($token)
+    {
+        if(empty($token))
+            return false;
+        $user = User::table()
+                    ->byToken($token);
+        if(!$user -> exists())
+            return false;
+        return $user->first();
+    }
 }

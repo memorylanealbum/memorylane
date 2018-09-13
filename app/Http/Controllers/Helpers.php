@@ -18,12 +18,12 @@ function success($data=[])
            ->json($response)
            ->header('Content-Type', 'application/json');
 }
-function failure($errors=[])
+function failure($errors=[], $response_code = 200)
 {
     if(!App::isLocal())
         $errors = ["error" => "Something went wrong."];
     $response = ["errors" => $errors,"status" => 0];
     return response()
-           ->json($response)
+           ->json($response, $response_code)
            ->header('Content-Type', 'application/json');
 }
