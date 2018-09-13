@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\ImageUploadRequest;
@@ -27,7 +28,7 @@ class ImageUploadController extends Controller
             return;
         }
         $content = $request -> file('image');
-        $path = '/january';
+        $path = Carbon::now() -> format('Y/m/d');
         $file_name = Storage::disk('public_uploads')->put($path, $content);
         if(!$file_name) {
             return $this -> error = ["error" => "Image could not be uploaded."];

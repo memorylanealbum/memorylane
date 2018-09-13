@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Mail\ActivationLink;
+use App\Mail\ResetPassword;
 use App\Http\Requests\UserRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -26,7 +27,7 @@ class UserController extends Controller
             $data['token']    = $this -> guidv4();
             $data['password'] = Hash::make($data['password']);
             User::create($data);
-            Mail::to("ansjabr@mailinator.com")->send(new ActivationLink($data));
+            //Mail::to("ansjabr@mailinator.com")->send(new ActivationLink($data));
             return success([$data['token']]);
         }
         catch(\Exception $e)
@@ -85,11 +86,11 @@ class UserController extends Controller
         if($validation -> fails())
             return cleanErrors($validation -> errors());
         $password = $this -> randomPassword();
-        $hashed_password = Hash::mak($password);
+        $hashed_password = Hash::make($password);
         User::table()
             ->byEmail($data['email'])
             ->update(['password' => $hashed_password]);
-        Mail::to("ansjabr@mailinator.com")->send(new PasswordReset($data));
+        Mail::to("ansjabr@mailinator.com")->send(new ResetPassword($password));
         return success();
     }
     private function randomPassword()
