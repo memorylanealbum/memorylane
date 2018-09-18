@@ -111,7 +111,7 @@ class ImageController extends Controller
                 $day = $plus_on_day->format('d');
                 $does_exist = $images -> where('day', $day);
                 if($does_exist -> count())
-                    $response[$day] = $does_exist -> pluck('image', 'thumb_150', 'thumb_320') -> toArray(); 
+                    $response[$day] = $does_exist -> toArray(); 
                 else
                     $response[$day] = "";
             }
