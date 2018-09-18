@@ -21,4 +21,9 @@ class Images extends Model
         $today = Carbon::now() -> format('Y-m-d');
         return $query ->whereDate('created_at', $today);
     }
+    public function scopeBetweenDates($query, $start_date, $end_date)
+    {
+        return $query -> whereDate('created_at', '>=', $start_date)
+                      -> whereDate('created_at', '<=', $end_date);
+    }
 }

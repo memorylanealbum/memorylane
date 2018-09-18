@@ -9,6 +9,7 @@ use App\Mail\ResetPassword;
 use App\Http\Requests\UserRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\ImageController;
 
 class UserController extends Controller
 {
@@ -18,6 +19,7 @@ class UserController extends Controller
     }
     public function register(Request $request)
     {
+        $image_controller = new ImageController();
         try
         {
             $data = $request -> all();
@@ -26,7 +28,8 @@ class UserController extends Controller
                 return cleanErrors($validation -> errors());
             $data['token']    = $this -> guidv4();
             $data['password'] = Hash::make($data['password']);
-            User::create($data);
+            $user_id = User::create($data) -> id;
+            $image_controller -> uploadProfilePic($request, $user_id);
             //Mail::to("ansjabr@mailinator.com")->send(new ActivationLink($data));
             return success(['_token' => $data['token']]);
         }
@@ -52,13 +55,15 @@ class UserController extends Controller
             return cleanErrors($validation -> errors());
         $user = User::table()
                     ->byUserName($data["username"]);
-        if(!$user -> exists())
+        if(!$user -> count())
             return failure(["error" => "Username or password did not work"]);
-        $user = $user -> first();
+        $user = $user -> first(["name", "email", "username", "token as _token", "image", "subscription", "password"]);
         $hash = $user -> password;
+        $user = $user -> toArray();
+        unset($user['password']);
         if(!$this -> isPasswordValid($data['password'], $hash))
             return failure(["error" => "Username or password did not work"]);
-        return success($user -> first(["name", "email", "username", "token as _token"]) -> toArray());
+        return success($user);
     }
     private function isPasswordValid($password, $hash)
     {
@@ -70,7 +75,7 @@ class UserController extends Controller
     {
         $user = User::table()
                     ->byActivationLink($activation_link);
-        if($user -> exists())
+        if($user -> count())
         {
             $user -> update(['status' => 1]);
             $status = 1;
@@ -129,7 +134,7 @@ class UserController extends Controller
             return false;
         $user = User::table()
                     ->byToken($token);
-        if(!$user -> exists())
+        if(!$user -> count())
             return false;
         return $user->first();
     }

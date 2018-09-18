@@ -13,7 +13,8 @@ class User extends Model
         'password',
         'token',
         'contact',
-        'avatar',
+        'image',
+        'sunscription',
         'facebook_id',
     ];
     public function scopeTable($query)
