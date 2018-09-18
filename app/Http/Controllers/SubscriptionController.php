@@ -20,7 +20,8 @@ class SubscriptionController extends Controller
             return cleanErrors($validation -> errors());
         if(!empty($data['subscription_db']))
             return failure(["error" => "You are already subscribed to ". $data['subscription'] . " subscription."]);
-        User::find($data['user_id'])->update(['subscription' => $data['subscription']]);
+        //dd($data['subscription'], $data['user_id']);
+        User::where('id', $data['user_id'])->update(['subscription' => $data['subscription']]);
         return success();
     }
 }
