@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Images;
 use Illuminate\Http\Request;
 use App\Http\Requests\ImageRequest;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ImageUploadController;
 
 class ImageController extends Controller
@@ -74,17 +75,41 @@ class ImageController extends Controller
         $file_name = $upload_controller ->getFileName();
         User::find($user_id)->update(['image' => $file_name]);
     }
+    private function makeDates($date, $subscription_type)
+    {
+        if($subscription_type == 'weekly')
+        {
+            $date  = new Carbon($date);
+            $start = $date -> startOfWeek();
+            $date  = new Carbon($date);
+            $end   = $date -> endOfWeek();
+        }
+        else
+        {
+            $date  = new Carbon($date);
+            $start = $date -> startOfMonth();
+            $date  = new Carbon($date);
+            $end   = $date -> endOfMonth();
+        }
+        return ["start" => $start, "end" => $end];
+    }
+    public function getForAdmin($user_id, $date, Request $request)
+    {
+        $request -> request -> add(["user_id" => $user_id, "date" => $date]);
+        return $this -> get($request);
+    }
     public function get(Request $request)
     {
+        $user_controller = new UserController();
         $data = $request -> all();
         $validation = $this -> image_validation -> get($data);
         if($validation -> fails())
             return cleanErrors($validation -> errors());
-        $date = new Carbon($data['date']);
-        $month = $date->format('F');
-        $year = $date->format('Y');
-        $first_of_month = new Carbon("first day of $month $year");
-        $last_of_month = new Carbon("last day of $month $year");
+        $subscription_type = $user_controller -> subscriptionType($data['user_id']);
+        if(empty($subscription_type)) return failure(["error" => "Not subscribed."]);
+        $range = $this -> makeDates($data['date'], $subscription_type);
+        $start = $range['start'];
+        $end = $range['end'];
         $images = Images::table()
                         ->selectRaw('
                                         image,
@@ -93,11 +118,11 @@ class ImageController extends Controller
                                         DATE_FORMAT(created_at, "%d") as day'
                                     )
                         ->byUserId($data['user_id'])
-                        ->betweenDates($first_of_month, $last_of_month)
+                        ->betweenDates($start, $end)
                         ->get();
-        return success($this -> createWholeMOnth($images, $first_of_month, $last_of_month));
+        return success($this -> createFromRange($images, $start, $end));
     }
-    private function createWholeMOnth($images, $start_date, $end_date)
+    private function createFromRange($images, $start_date, $end_date)
     {
         $response = [];
         for($i = 0; $i < 31; $i++)
@@ -111,7 +136,7 @@ class ImageController extends Controller
                 $day = $plus_on_day->format('d');
                 $does_exist = $images -> where('day', $day);
                 if($does_exist -> count())
-                    $response[$day] = $does_exist -> toArray(); 
+                    $response[$day] = $does_exist -> first() -> toArray(); 
                 else
                     $response[$day] = "";
             }

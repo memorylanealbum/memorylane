@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Controllers\UserController;
 use App\Http\Requests\SubscriptionRequest;
 
 class SubscriptionController extends Controller
@@ -20,8 +21,18 @@ class SubscriptionController extends Controller
             return cleanErrors($validation -> errors());
         if(!empty($data['subscription_db']))
             return failure(["error" => "You are already subscribed to ". $data['subscription'] . " subscription."]);
-        //dd($data['subscription'], $data['user_id']);
         User::where('id', $data['user_id'])->update(['subscription' => $data['subscription']]);
         return success();
+    }
+    public function getStartingDate($user_id)
+    {
+        $user_controller   = new UserController();
+        $registration_date = User::table()
+                                 ->byId($user_id)
+                                 ->selectRaw('DATE_FORMAT(created_at, "%d") as day,
+                                             DATE_FORMAT(created_at, "%m") as month,
+                                             DATE_FORMAT(created_at, "%Y") as year')
+                                ->first();
+        return success($registration_date);
     }
 }

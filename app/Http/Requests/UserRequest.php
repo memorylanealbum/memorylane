@@ -31,9 +31,16 @@ class UserRequest
     public function changePassword($data)
     {
         return Validator::make($data, [
-            "username"      => "required|string|exists:users,username",
             "password"      => "required",
             "new_password"  => "required|min:6|max:16|confirmed",
         ]);
     }
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Panel Requests
+    |--------------------------------------------------------------------------
+    |
+    | Following requests are for admin panel
+    |
+    */
 }

@@ -46,7 +46,7 @@ class UserController extends Controller
         $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // set version to 0100
         $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
             return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
-        }
+    }
     public function login(Request $request)
     {
         $data = $request -> all();
@@ -63,7 +63,16 @@ class UserController extends Controller
         unset($user['password']);
         if(!$this -> isPasswordValid($data['password'], $hash))
             return failure(["error" => "Username or password did not work"]);
+        $user['_token'] = $this -> updateToken($user['username']);
         return success($user);
+    }
+    private function updateToken($username)
+    {
+        $token = $this -> guidv4();
+        User::table()
+            ->byUserName($username)
+            ->update(['token' => $token]);
+        return $token;
     }
     private function isPasswordValid($password, $hash)
     {
@@ -124,7 +133,7 @@ class UserController extends Controller
             return failure(["error" => "The password you entered is not correct."]);
         $hashed_password = Hash::make($data['new_password']);
         $user = User::table()
-                    ->byUserName()
+                    ->byUserName($data['username'])
                     ->update(['password' => $hashed_password]);
         return success();
     }
@@ -137,5 +146,39 @@ class UserController extends Controller
         if(!$user -> count())
             return false;
         return $user->first();
+    }
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Panel Methods
+    |--------------------------------------------------------------------------
+    |
+    | Following methods are for admin panel
+    |
+    */
+    public function index($subscription)
+    {
+        if($subscription == "not")
+        {
+            $user = User::table()
+                        ->notSubscribed();
+        }
+        else
+        {
+            $user = User::table()
+                        ->ofType($subscription);
+        }
+        $user = $user -> selectRaw('
+                                    u.id, u.name , u.email,
+                                    CASE WHEN u.image is null or u.image = "" THEN "img/blank-profile.png" ELSE u.image END as image
+                                    '
+                                  ) -> get();
+        return success($user);
+    }
+    public function subscriptionType($user_id)
+    {
+        return User::table()
+                   ->byId($user_id)
+                   ->first(['subscription'])
+                   ->subscription;
     }
 }

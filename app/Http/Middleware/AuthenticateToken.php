@@ -27,6 +27,7 @@ class AuthenticateToken
         $user_details['subscription_db'] = $user_details['subscription'];
         unset($user_details['subscription']);
         unset($user_details['id']);
+        unset($user_details['password']);
         $request -> request -> add($user_details);
         return $next($request);
     }

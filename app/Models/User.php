@@ -29,8 +29,23 @@ class User extends Model
     {
         return $query -> where('u.email', $email);
     }
+    public function scopeById($query, $id)
+    {
+        return $query -> where('u.id', $id);
+    }
     public function scopeByToken($query, $token)
     {
         return $query -> where('u.token', $token);
+    }
+    public function scopeOfType($query, $subscription)
+    {
+        return $query -> where('subscription', $subscription);
+    }
+    public function scopeNotSubscribed($query)
+    {
+        return $query -> where(function($q){
+            $q -> where('u.subscription', '')
+               -> orWhereNull('u.subscription');
+        });
     }
 }
