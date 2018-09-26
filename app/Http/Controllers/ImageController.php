@@ -39,6 +39,37 @@ class ImageController extends Controller
         $this -> insertIntoImages($data['user_id'], $file_name, $thumb_150, $thumb_320, $compression, $title);
         return success();
     }
+    public function update(Request $request)
+    {
+        $data = $request -> all();
+        $upload_controller =  new ImageUploadController();
+        $upload_controller -> upload($request);
+        if($upload_controller -> fails())
+        {
+            return $upload_controller -> error();
+        }
+        $file_name = $upload_controller ->getFileName();
+        $compression = 0; $thumb_150 = ""; $thumb_320 = "";
+        if(!$upload_controller -> tinyPngFails())
+        {
+            $thumb_150  = $upload_controller ->getThumb150();
+            $thumb_320  = $upload_controller ->getThumb320();
+            $compression = 1;
+        }
+        $title = !empty($data['title']) ? $data['title'] : '';
+        $this -> expirePreviousImage($data['user_id']);
+        $this -> insertIntoImages($data['user_id'], $file_name, $thumb_150, $thumb_320, $compression, $title);
+        return success();
+    }
+    private function expirePreviousImage($user_id)
+    {
+        $image = Images::table()
+                      ->byUserId($user_id)
+                      ->active()
+                      ->today();
+        if($image -> count())
+            $image -> update(['status' => 0]);
+    }
     private function canUpload($user_id)
     {
         $image  = Images::table()
@@ -119,6 +150,7 @@ class ImageController extends Controller
                                     )
                         ->byUserId($data['user_id'])
                         ->betweenDates($start, $end)
+                        ->active()
                         ->get();
         return success($this -> createFromRange($images, $start, $end));
     }

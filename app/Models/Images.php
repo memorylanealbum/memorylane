@@ -26,4 +26,8 @@ class Images extends Model
         return $query -> whereDate('created_at', '>=', $start_date)
                       -> whereDate('created_at', '<=', $end_date);
     }
+    public function scopeActive($query)
+    {
+        return $query -> where('status', '1');
+    }
 }

@@ -1,5 +1,5 @@
 <?php
-
+ini_set('max_execution_time', 120);
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -27,6 +27,7 @@ Route::prefix('api/v1')->group(function () {
 });
 Route::middleware(['auth.token'])->prefix('api/v1')->group(function () {
     Route::post('image/upload',         'ImageController@upload');
+    Route::post('image/update',         'ImageController@update');
     Route::post('image/get',            'ImageController@get');
     Route::post('subscribe',            'SubscriptionController@subscribe');
     Route::post('auth/password/change', 'UserController@changePassword');
