@@ -66,6 +66,29 @@ class UserController extends Controller
         $user['_token'] = $this -> updateToken($user['username']);
         return success($user);
     }
+    public function logout(Request $request)
+    {
+        $data = $request -> all();
+        User::table()
+            ->byId($data['user_id'])
+            ->update(['token' => '']);
+        return success();
+    }
+    public function updateProfile(Request $request)
+    {
+        $image_controller = new ImageController();
+        $data = $request -> all();
+        $validation = $this -> user_validation -> updateProfile($data);
+        if($validation -> fails())
+            return cleanErrors($validation -> errors());
+        $image_controller -> uploadProfilePic($request, $data['user_id']);
+        User::find($data['user_id'])
+            ->update([
+                'email' => $data['request_email'],
+                'name' => $data['request_name'],
+            ]);
+        return success();
+    }
     private function updateToken($username)
     {
         $token = $this -> guidv4();

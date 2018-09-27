@@ -28,6 +28,9 @@ class AuthenticateToken
         unset($user_details['subscription']);
         unset($user_details['id']);
         unset($user_details['password']);
+        unset($user_details['image']);
+        if(!empty($data['email'])) $user_details['request_email'] = $data['email'];
+        if(!empty($data['name'])) $user_details['request_name'] = $data['name'];
         $request -> request -> add($user_details);
         return $next($request);
     }

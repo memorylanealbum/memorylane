@@ -15,6 +15,14 @@ class UserRequest
             "password"  => "required|min:6|max:16|confirmed",
         ]);
     }
+    public function updateProfile($data)
+    {
+        $user_id = $data['user_id'];
+        return Validator::make($data, [
+            "request_name"      => "required|string",
+            "request_email"     => "email|required|unique:users,email,$user_id"
+        ]);
+    }
     public function login($data)
     {
         return Validator::make($data, [
