@@ -129,7 +129,11 @@ class ImageController extends Controller
         $request -> request -> add(["user_id" => $user_id, "date" => $date]);
         return $this -> get($request);
     }
-    public function get(Request $request)
+    public function monthly(Request $request)
+    {
+        return $this -> get($request, "monthly");
+    }
+    public function get(Request $request, $period = null)
     {
         $user_controller = new UserController();
         $data = $request -> all();
@@ -137,7 +141,7 @@ class ImageController extends Controller
         if($validation -> fails())
             return cleanErrors($validation -> errors());
         $subscription_type = $user_controller -> subscriptionType($data['user_id']);
-        if(empty($subscription_type)) return failure(["error" => "Not subscribed."]);
+        if(empty($subscription_type) || !empty($period)) $subscription_type = "monthly";
         $range = $this -> makeDates($data['date'], $subscription_type);
         $start = $range['start'];
         $end = $range['end'];

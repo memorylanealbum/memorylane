@@ -183,12 +183,14 @@ class UserController extends Controller
         if($subscription == "not")
         {
             $user = User::table()
-                        ->notSubscribed();
+                        ->notSubscribed()
+                        ->active();
         }
         else
         {
             $user = User::table()
-                        ->ofType($subscription);
+                        ->ofType($subscription)
+                        ->active();
         }
         $user = $user -> selectRaw('
                                     u.id, u.name , u.email,

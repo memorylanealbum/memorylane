@@ -48,4 +48,8 @@ class User extends Model
                -> orWhereNull('u.subscription');
         });
     }
+    public function scopeActive($query)
+    {
+        return $query -> where('status', 1);
+    }
 }
